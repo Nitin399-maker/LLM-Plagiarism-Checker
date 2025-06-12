@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Plagiarism Detector</title>
+    <link
+    rel="icon"
+    type="image/svg+xml"
+    href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTUiIGZpbGw9IiMyNTYzZWIiLz48cGF0aCBmaWxsPSIjZmZmIiBkPSJtMTYgNyAyIDcgNyAyLTcgMi0yIDctMi03LTctMiA3LTJaIi8+PC9zdmc+" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-md-10 text-center">
+                    <div class="p-4 shadow rounded bg-white">
+                        <h1 class="display-5 fw-bold text-primary">🧠 LLM Plagiarism Detector</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">Step 1: Original Content</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="originalContent" class="form-label">Enter your proprietary content:</label>
+                            <textarea class="form-control" id="originalContent" rows="10" placeholder="Paste your original text here..."></textarea>
+                        </div>
+                        <button id="generateQuestionsBtn" class="btn btn-success mt-3 ms-2">Generate Questions</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="card-title mb-0">Step 2: LLM Query Setup</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="questionsContainer" class="mb-3 d-none">
+                            <label class="form-label">Suggested Questions:</label>
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary dropdown-toggle w-100 text-start text-truncate" type="button" id="questionDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false" style="max-width: 100%; overflow: hidden;">
+                                    Select a question...
+                                </button>
+                                <ul class="dropdown-menu w-100" id="questionsList" aria-labelledby="questionDropdownBtn">
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="promptInput" class="form-label">Selected prompt:</label>
+                            <textarea class="form-control" id="promptInput" rows="5" placeholder="Select a question from above or enter your own prompt"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="modelSelect" class="form-label">Select LLM Model:</label>
+                            <select class="form-select" id="modelSelect">
+                                <option value="openai/gpt-4.1-mini" selected>OpenAI GPT-4.1-mini</option>
+                                <option value="openai/gpt-4.1-nano">OpenAI GPT-4.1-nano</option>
+                                <option value="anthropic/claude-3.5-sonnet">Anthropic Claude 3.5 Sonnet</option>
+                                <option value="anthropic/claude-3.7-sonnet">Anthropic Claude 3.7 Sonnet</option>
+                                <option value="anthropic/claude-3-haiku">Anthropic Claude 3.5 Haiku</option>
+                                <option value="mistralai/mistral-large">Mistral Large</option>
+                                <option value="meta-llama/llama-3-70b-instruct">Meta Llama 3 70B</option>
+                                <option value="deepseek/deepseek-chat">DeepSeek V3</option>
+                                <option value="google/gemini-2.0-flash-001">Gemini Flash 2.0</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="embeddingModel" class="form-label">Embedding Model:</label>
+                            <select class="form-select" id="embeddingModel">
+                                <option value="text-embedding-3-large">OpenAI Text Embedding 3 Large</option>
+                                <option value="text-embedding-ada-002">OpenAI Ada-002</option>
+                                <option value="text-embedding-3-small">OpenAI Text Embedding 3 Small</option>
+                            </select>
+                        </div>
+                        <button id="testLLMBtn" class="btn btn-success mt-3">Test LLM Knowledge</button>
+                        <button id="searchBasedBtn" class="btn btn-info mt-3 ms-2">Generate Search-Based Answer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex justify-content-center mt-4 mb-4" id="loader" style="display: none !important;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+        <div class="card mt-4 d-none" id="resultCard">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0">Plagiarism Detection Results</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">Original Content:</h6>
+                            </div>
+                            <div class="card-body p-0">
+                                <div id="originalContentDisplay" class="p-3 overflow-auto" style="height: 300px; white-space: pre-wrap; font-family: system-ui;" placeholder="Not available">
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">LLM Response:</h6>
+                            </div>
+                            <div class="card-body p-0">
+                                <textarea id="llmResponseEditable" class="form-control p-3 overflow-auto" style="height: 300px; white-space: pre-wrap; font-family: system-ui;" placeholder="Not generated yet"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="searchBasedSection" class="mt-4 d-none">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">Scraped Web Content:</h6>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div id="scrapedContent" class="p-3 overflow-auto" style="height: 300px; white-space: pre-wrap; font-family: system-ui;">
+                                        Not available
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">Search-Based Answer:</h6>
+                                </div>
+                                <div class="card-body p-0">
+                                    <textarea id="searchBasedAnswer" class="form-control p-3 overflow-auto" style="height: 300px; white-space: pre-wrap; font-family: system-ui;" placeholder="Not generated yet"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-center">
+                        <button id="calculateSimilarityBtn" class="btn btn-warning">Calculate Similarity Scores</button>
+                    </div>
+                </div>
+                
+                <div id="similarityScoresSection" class="mt-4 d-none">
+                    <h6>Similarity Scores:</h6>
+                    <div class="bg-light p-3 rounded mb-3">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <p class="fw-bold">Original Content vs LLM Response:</p>
+                                <div class="progress mb-3" style="height: 20px;">
+                                    <div id="originalVsLLM" class="progress-bar bg-primary" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <p class="fw-bold">Original Content vs Search-Based Answer:</p>
+                                <div class="progress mb-3" style="height: 20px;">
+                                    <div id="originalVsSearch" class="progress-bar bg-success" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <p class="fw-bold">LLM Response vs Search-Based Answer:</p>
+                                <div class="progress mb-3" style="height: 20px;">
+                                    <div id="llmVsSearch" class="progress-bar bg-info" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4"></div>
+                
+                <div class="mt-3 text-center">
+                    <button id="deepAnalysisBtn" class="btn btn-primary" disabled>Get Expert Analysis</button>
+                </div>
+                
+                <div class="mt-4 d-none" id="deepAnalysisSection">
+                    <h6>Expert Analysis:</h6>
+                    <div id="deepAnalysisResult" class="alert alert-info">
+                        Analyzing...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="/static/scripts.js"></script>
+</body>
+</html>
