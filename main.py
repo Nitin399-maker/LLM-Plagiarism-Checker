@@ -110,6 +110,14 @@ async def get_llm_response(prompt: str, model_id: str) -> str:
     except Exception as e:
         raise Exception(f"Error getting LLM response: {str(e)}")
 
+
+
+@app.get("/health", tags=["Health Check"])
+def health_check():
+    return {"status": "ok"}
+
+
+
 @app.post("/generate-questions")
 async def generate_questions(input_data: PromptInput):
     try:
@@ -285,4 +293,9 @@ async def calculate_similarity(request: SimilarityRequest):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8081)
+    uvicorn.run(
+        "main:app",       
+        host="127.0.0.1",   
+        port=9146,
+        reload=True         
+    )

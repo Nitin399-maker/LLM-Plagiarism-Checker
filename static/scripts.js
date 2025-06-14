@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
         questionsList.innerHTML = '';
         
         try {
-            const response = await fetch('http://localhost:8081/generate-questions', {
+            const response = await fetch('/generate-questions', {
                 method: 'POST',headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
                     text: content
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         try {
             // Get LLM response
-            const responseData = await fetch('http://localhost:8081/test-llm', {
+            const responseData = await fetch('/test-llm', {
                 method: 'POST',headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
                     prompt: promptInput.value.trim(),
@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', function() {
         similarityScoresSection.classList.add('d-none');
         
         try {
-            const response = await fetch('http://localhost:8081/search-based-answer', {
+            const response = await fetch('/search-based-answer', {
                 method: 'POST',headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
                     prompt: promptInput.value.trim(),
@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function() {
         loader.style.cssText = "display: flex !important; justify-content: center;";
         
         try {
-            const response = await fetch('http://localhost:8081/calculate-similarity', {
+            const response = await fetch('/calculate-similarity', {
                 method: 'POST',headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
                     original_content: savedOriginalContent,
@@ -197,7 +197,7 @@ document.addEventListener('DOMContentLoaded', function() {
         loader.style.cssText = "display: flex !important; justify-content: center;";
         
         try {
-            const response = await fetch('http://localhost:8081/analyze-response', {
+            const response = await fetch('/analyze-response', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
